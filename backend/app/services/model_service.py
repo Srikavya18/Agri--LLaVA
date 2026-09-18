@@ -8,15 +8,25 @@ crop + disease from an image". Three implementations:
                          predictions. Guarded so it can never run when
                          ENVIRONMENT=production (see core/config.py).
 
-  RemoteModelService  - Calls an external GPU-hosted inference API over HTTP.
-                         This is what production should use.
+  RemoteModelService   - Calls an external GPU-hosted inference API over HTTP.
+                          This is what production should use: the FastAPI backend
+                          here stays lightweight (no torch/CUDA needed) and simply
+                          forwards the image + text + language to a separate
+                          GPU service running Qwen2.5-VL-7B-Instruct + your LoRA
+                          adapter (see ml/inference/ — built in a later phase).
 
-  LocalModelService   - Placeholder for loading the model in-process.
+  LocalModelService     - Placeholder for loading the model in-process, only valid
+                          if this FastAPI backend itself runs on a GPU host. Not
+                          yet implemented; raises a clear error until ml/inference
+                          is built and wired in.
 
 All implementations return a plain dict shaped like:
-    {"crop": str, "disease": str, "confidence": float}
-"""
+    {"crop": str, "disease": str, "confidence": float, "raw_language_note": str}
 
+The caller (api/routes.py) is responsible for running this dict through the RAG
+retriever for grounded facts, then validating the final response with
+models.schemas.AnalysisResponse.
+"""
 import hashlib
 import logging
 from abc import ABC, abstractmethod
@@ -27,7 +37,9 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-
+# A small, deterministic pool of outcomes for the mock service. Chosen to match
+# entries that actually exist in knowledge/crop_diseases.json so RAG grounding
+# works end-to-end during local development.
 _MOCK_OUTCOMES = [
     {"crop": "Tomato", "disease": "Early Blight", "confidence": 0.87},
     {"crop": "Tomato", "disease": "Late Blight", "confidence": 0.81},
@@ -41,19 +53,13 @@ _MOCK_OUTCOMES = [
 
 
 class ModelInferenceError(Exception):
-    """Raised when inference fails."""
+    """Raised when inference fails. Message should be safe to log; caller decides user-facing text."""
 
 
 class ModelInferenceService(ABC):
-
     @abstractmethod
-    async def predict(
-        self,
-        image: Image.Image,
-        text: Optional[str],
-        language: str
-    ) -> dict:
-        """Returns crop, disease and confidence."""
+    async def predict(self, image: Image.Image, text: Optional[str], language: str) -> dict:
+        """Returns {"crop": str, "disease": str, "confidence": float}."""
         raise NotImplementedError
 
 
@@ -61,27 +67,18 @@ class MockModelService(ModelInferenceService):
     """
     DEVELOPMENT ONLY.
 
-    Deterministically picks an outcome based on a hash of the image bytes.
-    This is NOT a real prediction.
+    Deterministically picks an outcome based on a hash of the image bytes, so the
+    same image always produces the same mock result (useful for testing the
+    frontend without random flakiness). This is NOT a real prediction.
     """
 
-    async def predict(
-        self,
-        image: Image.Image,
-        text: Optional[str],
-        language: str
-    ) -> dict:
+    async def predict(self, image: Image.Image, text: Optional[str], language: str) -> dict:
+        logger.warning("Using MockModelService — DEVELOPMENT ONLY, not a real prediction.")
 
-        logger.warning(
-            "Using MockModelService — DEVELOPMENT ONLY, not a real prediction."
-        )
-
+        # Hash the actual pixel data so identical images give identical mock results.
         pixel_bytes = image.tobytes()
-
         digest = hashlib.sha256(pixel_bytes).hexdigest()
-
         index = int(digest, 16) % len(_MOCK_OUTCOMES)
-
         outcome = dict(_MOCK_OUTCOMES[index])
 
         return outcome
@@ -89,124 +86,70 @@ class MockModelService(ModelInferenceService):
 
 class RemoteModelService(ModelInferenceService):
     """
-    Calls an external GPU-hosted inference service.
+    Calls an external GPU-hosted inference service (your Qwen2.5-VL-7B-Instruct +
+    LoRA adapter deployment) over HTTP. See docs/deployment.md for how to deploy
+    that service; this class only needs its URL.
     """
 
-    def __init__(
-        self,
-        api_url: str,
-        api_key: str = "",
-        timeout_seconds: float = 60.0
-    ):
+    def __init__(self, api_url: str, api_key: str = "", timeout_seconds: float = 60.0):
         if not api_url:
             raise ModelInferenceError(
-                "MODEL_API_URL is not set. RemoteModelService requires "
-                "a deployed GPU inference endpoint."
+                "MODEL_API_URL is not set. RemoteModelService requires a deployed "
+                "GPU inference endpoint (see docs/deployment.md)."
             )
-
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
 
-    async def predict(
-        self,
-        image: Image.Image,
-        text: Optional[str],
-        language: str
-    ) -> dict:
-
+    async def predict(self, image: Image.Image, text: Optional[str], language: str) -> dict:
         import io
 
         buffer = io.BytesIO()
-
-        image.save(
-            buffer,
-            format="JPEG",
-            quality=90
-        )
-
+        image.save(buffer, format="JPEG", quality=90)
         buffer.seek(0)
 
         headers = {}
-
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        files = {
-            "image": (
-                "image.jpg",
-                buffer,
-                "image/jpeg"
-            )
-        }
-
-        data = {
-            "text": text or "",
-            "language": language
-        }
+        files = {"image": ("image.jpg", buffer, "image/jpeg")}
+        data = {"text": text or "", "language": language}
 
         try:
-
-            async with httpx.AsyncClient(
-                timeout=self.timeout_seconds
-            ) as client:
-
+            async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
                 response = await client.post(
-                    f"{self.api_url}/predict",
-                    headers=headers,
-                    files=files,
-                    data=data
+                    f"{self.api_url}/predict", headers=headers, files=files, data=data
                 )
-
                 response.raise_for_status()
-
                 return response.json()
-
         except httpx.TimeoutException:
-
-            raise ModelInferenceError(
-                "Inference request to the model service timed out."
-            )
-
+            raise ModelInferenceError("Inference request to the model service timed out.")
         except httpx.HTTPStatusError as e:
-
-            raise ModelInferenceError(
-                f"Model service returned an error: "
-                f"{e.response.status_code}"
-            )
-
+            raise ModelInferenceError(f"Model service returned an error: {e.response.status_code}")
         except httpx.RequestError as e:
-
-            raise ModelInferenceError(
-                f"Could not reach the model service: {e}"
-            )
+            raise ModelInferenceError(f"Could not reach the model service: {e}")
 
 
 class LocalModelService(ModelInferenceService):
     """
     NOT YET IMPLEMENTED.
 
-    Will load Qwen2.5-VL-7B-Instruct + LoRA adapter directly
-    once ml/inference is implemented and a GPU is available.
+    Will load Qwen2.5-VL-7B-Instruct + your LoRA adapter directly in-process using
+    ml/inference (built in a later phase) once you provide LORA_ADAPTER_PATH and
+    this backend is running on a GPU host. Implementing this before ml/inference
+    exists would mean either faking the model or silently doing nothing — neither
+    is acceptable, so this raises clearly instead.
     """
 
     def __init__(self, lora_adapter_path: str):
-
         raise ModelInferenceError(
-            "LocalModelService is not implemented yet. "
-            "It depends on ml/inference/, which is built in a later phase, "
-            "and requires LORA_ADAPTER_PATH to point at your trained adapter. "
-            "Use INFERENCE_MODE=mock for local development or "
+            "LocalModelService is not implemented yet. It depends on ml/inference/, "
+            "which is built in a later phase, and requires LORA_ADAPTER_PATH to point "
+            "at your trained adapter. Use INFERENCE_MODE=mock for local dev or "
             "INFERENCE_MODE=remote once you have a deployed GPU inference service."
         )
 
-    async def predict(
-        self,
-        image: Image.Image,
-        text: Optional[str],
-        language: str
-    ) -> dict:
-
+    async def predict(self, image: Image.Image, text: Optional[str], language: str) -> dict:
         raise NotImplementedError
 
 
@@ -216,24 +159,11 @@ def get_model_service(
     model_api_key: str = "",
     lora_adapter_path: str = "",
 ) -> ModelInferenceService:
-
-    """Factory: builds the correct ModelInferenceService."""
-
+    """Factory: builds the correct ModelInferenceService based on INFERENCE_MODE."""
     if inference_mode == "mock":
         return MockModelService()
-
     if inference_mode == "remote":
-        return RemoteModelService(
-            api_url=model_api_url,
-            api_key=model_api_key
-        )
-
+        return RemoteModelService(api_url=model_api_url, api_key=model_api_key)
     if inference_mode == "local":
-        return LocalModelService(
-            lora_adapter_path=lora_adapter_path
-        )
-
-    raise ValueError(
-        f"Unknown INFERENCE_MODE '{inference_mode}'. "
-        "Must be mock, remote, or local."
-    )
+        return LocalModelService(lora_adapter_path=lora_adapter_path)
+    raise ValueError(f"Unknown INFERENCE_MODE '{inference_mode}'. Must be mock, remote, or local.")

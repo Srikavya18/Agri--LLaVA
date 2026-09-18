@@ -1,0 +1,217 @@
+{
+  "tomato_early_blight": {
+    "crop": "Tomato",
+    "disease": "Early Blight",
+    "aliases": ["alternaria solani", "early leaf spot"],
+    "symptoms": [
+      "Dark brown circular spots with concentric rings on lower/older leaves",
+      "Yellowing of tissue surrounding the spots",
+      "Leaves eventually wither and drop"
+    ],
+    "causes": [
+      "Fungal infection by Alternaria solani",
+      "Warm, humid conditions with prolonged leaf wetness",
+      "Overhead irrigation and poor air circulation"
+    ],
+    "prevention": [
+      "Rotate crops away from tomato/potato family for 2-3 years",
+      "Space plants to improve airflow",
+      "Avoid overhead watering; water at the base",
+      "Remove and destroy infected plant debris"
+    ],
+    "organic_treatment": [
+      "Remove and dispose of infected lower leaves promptly",
+      "Apply copper-based or biological fungicides labeled for early blight",
+      "Mulch to reduce soil splash onto leaves"
+    ],
+    "chemical_treatment": [
+      "Use a fungicide labeled for early blight on tomato, following local label directions and pre-harvest intervals"
+    ]
+  },
+  "tomato_late_blight": {
+    "crop": "Tomato",
+    "disease": "Late Blight",
+    "aliases": ["phytophthora infestans"],
+    "symptoms": [
+      "Large, irregular water-soaked lesions on leaves that turn dark brown/black",
+      "White fuzzy fungal growth on the underside of leaves in humid weather",
+      "Rapid collapse of foliage; dark lesions on stems and fruit"
+    ],
+    "causes": [
+      "Oomycete pathogen Phytophthora infestans",
+      "Cool, wet, humid conditions",
+      "Spreads rapidly via wind-blown spores"
+    ],
+    "prevention": [
+      "Plant resistant or tolerant varieties where available",
+      "Avoid overhead irrigation",
+      "Ensure good airflow and avoid overcrowding",
+      "Monitor local blight forecasts during high-risk weather"
+    ],
+    "organic_treatment": [
+      "Remove and destroy infected plants immediately to slow spread",
+      "Apply copper-based fungicides preventively before infection sets in"
+    ],
+    "chemical_treatment": [
+      "Use a fungicide labeled for late blight on tomato; because it spreads fast, preventive application before disease onset is more effective than curative use"
+    ]
+  },
+  "tomato_healthy": {
+    "crop": "Tomato",
+    "disease": "Healthy",
+    "aliases": [],
+    "symptoms": ["No visible disease symptoms; uniform green foliage"],
+    "causes": [],
+    "prevention": [
+      "Continue routine monitoring",
+      "Maintain balanced watering and fertilization"
+    ],
+    "organic_treatment": [],
+    "chemical_treatment": []
+  },
+  "potato_early_blight": {
+    "crop": "Potato",
+    "disease": "Early Blight",
+    "aliases": ["alternaria solani"],
+    "symptoms": [
+      "Dark brown spots with concentric ring pattern on older leaves",
+      "Yellow halo around lesions",
+      "Premature leaf drop reducing tuber yield"
+    ],
+    "causes": [
+      "Fungal infection by Alternaria solani",
+      "Plant stress, warm temperatures, and leaf wetness"
+    ],
+    "prevention": [
+      "Rotate crops with non-solanaceous plants",
+      "Maintain adequate plant nutrition to reduce stress",
+      "Avoid overhead irrigation"
+    ],
+    "organic_treatment": [
+      "Remove infected foliage",
+      "Apply copper-based or biological fungicides"
+    ],
+    "chemical_treatment": [
+      "Use a fungicide labeled for early blight on potato according to local guidance"
+    ]
+  },
+  "potato_late_blight": {
+    "crop": "Potato",
+    "disease": "Late Blight",
+    "aliases": ["phytophthora infestans"],
+    "symptoms": [
+      "Water-soaked, dark lesions on leaves and stems",
+      "White mold growth on leaf undersides in humid conditions",
+      "Rapid plant collapse; tuber rot"
+    ],
+    "causes": [
+      "Oomycete pathogen Phytophthora infestans",
+      "Cool, moist weather"
+    ],
+    "prevention": [
+      "Use certified disease-free seed potatoes",
+      "Plant resistant varieties where available",
+      "Destroy volunteer potato plants and cull piles"
+    ],
+    "organic_treatment": [
+      "Remove and destroy infected plants promptly",
+      "Preventive copper-based fungicide application"
+    ],
+    "chemical_treatment": [
+      "Apply a fungicide labeled for late blight on potato before disease pressure builds, per local label directions"
+    ]
+  },
+  "potato_healthy": {
+    "crop": "Potato",
+    "disease": "Healthy",
+    "aliases": [],
+    "symptoms": ["No visible disease symptoms"],
+    "causes": [],
+    "prevention": ["Continue routine monitoring and balanced fertilization"],
+    "organic_treatment": [],
+    "chemical_treatment": []
+  },
+  "pepper_bell_bacterial_spot": {
+    "crop": "Bell Pepper",
+    "disease": "Bacterial Spot",
+    "aliases": ["xanthomonas campestris"],
+    "symptoms": [
+      "Small, dark, water-soaked spots on leaves and fruit",
+      "Spots may merge and cause leaf yellowing and drop",
+      "Raised, scabby lesions on fruit"
+    ],
+    "causes": [
+      "Bacterial infection by Xanthomonas species",
+      "Spread by splashing water, rain, and contaminated tools/seed"
+    ],
+    "prevention": [
+      "Use certified disease-free seed and transplants",
+      "Avoid working in fields when foliage is wet",
+      "Rotate crops and sanitize tools"
+    ],
+    "organic_treatment": [
+      "Apply copper-based bactericides as a preventive measure",
+      "Remove and destroy heavily infected plants"
+    ],
+    "chemical_treatment": [
+      "Copper-based products remain the primary chemical control; consult local agricultural extension for resistance management"
+    ]
+  },
+  "pepper_bell_healthy": {
+    "crop": "Bell Pepper",
+    "disease": "Healthy",
+    "aliases": [],
+    "symptoms": ["No visible disease symptoms"],
+    "causes": [],
+    "prevention": ["Continue routine monitoring"],
+    "organic_treatment": [],
+    "chemical_treatment": []
+  },
+  "apple_cedar_apple_rust": {
+    "crop": "Apple",
+    "disease": "Cedar Apple Rust",
+    "aliases": ["gymnosporangium juniperi-virginianae"],
+    "symptoms": [
+      "Bright yellow-orange spots on upper leaf surface",
+      "Small black dots within the spots",
+      "Orange, tube-like structures on leaf undersides later in season"
+    ],
+    "causes": [
+      "Fungal pathogen requiring both apple/crabapple and juniper/cedar hosts to complete its life cycle"
+    ],
+    "prevention": [
+      "Remove nearby juniper/cedar hosts where feasible",
+      "Plant resistant apple varieties",
+      "Ensure good air circulation"
+    ],
+    "organic_treatment": [
+      "Apply sulfur-based fungicides preventively in early season"
+    ],
+    "chemical_treatment": [
+      "Apply a fungicide labeled for cedar apple rust starting at bud break, per local label guidance"
+    ]
+  },
+  "corn_common_rust": {
+    "crop": "Corn (Maize)",
+    "disease": "Common Rust",
+    "aliases": ["puccinia sorghi"],
+    "symptoms": [
+      "Small, circular to elongate, reddish-brown pustules on both leaf surfaces",
+      "Pustules rupture and release rust-colored spores"
+    ],
+    "causes": [
+      "Fungal pathogen Puccinia sorghi",
+      "Cool, moist conditions favor spread"
+    ],
+    "prevention": [
+      "Plant resistant hybrids where available",
+      "Monitor fields during cool, humid periods"
+    ],
+    "organic_treatment": [
+      "Generally minor impact; cultural controls and resistant varieties are the primary organic strategy"
+    ],
+    "chemical_treatment": [
+      "Foliar fungicide application may be warranted for severe infections on susceptible hybrids, per local guidance"
+    ]
+  }
+}

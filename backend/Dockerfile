@@ -10,9 +10,10 @@
 # /peft/bitsandbytes/accelerate to requirements.txt — do not attempt that on this
 # slim image.
 #
-# IMPORTANT: build context must be the REPO ROOT (not backend/), because this
-# image also needs knowledge/crop_diseases.json which lives outside backend/.
-# Build from the repo root with:
+# backend/ is self-contained (backend/knowledge/crop_diseases.json is a synced
+# copy of the repo-root knowledge/ file — see app/core/config.py), so this can
+# build from either the repo root or backend/ as context. Building from the
+# repo root keeps the command consistent with other tooling:
 #   docker build -f backend/Dockerfile -t agri-llava-backend .
 
 FROM python:3.11-slim
@@ -29,12 +30,9 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/app ./app
-COPY knowledge ./knowledge
+COPY backend/knowledge ./knowledge
 
 ENV PYTHONUNBUFFERED=1
-# Overrides the local-dev-relative default in app/core/config.py, since the
-# container layout (/app/app + /app/knowledge) differs from the repo layout.
-ENV KNOWLEDGE_BASE_PATH=knowledge/crop_diseases.json
 
 EXPOSE 8000
 

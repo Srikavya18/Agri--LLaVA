@@ -32,7 +32,14 @@ class Settings(BaseSettings):
     max_image_size_mb: int = 10
 
     # Knowledge base
-    knowledge_base_path: str = "../knowledge/crop_diseases.json"
+    # Deliberately points INSIDE backend/ (not ../knowledge/) so the file is
+    # always bundled with the backend regardless of deployment layout — a
+    # relative "../knowledge" path breaks on platforms (e.g. Vercel) that only
+    # package the configured root directory, since knowledge/ would then live
+    # outside that root. A synced top-level copy at repo root /knowledge/ is
+    # kept for documentation/dataset-tooling purposes only; this path is what
+    # the running app actually reads.
+    knowledge_base_path: str = "knowledge/crop_diseases.json"
 
     model_config = SettingsConfigDict(
         env_file=".env",
