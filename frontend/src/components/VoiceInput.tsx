@@ -5,9 +5,10 @@ import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 interface VoiceInputProps {
   langCode: string;
   onTranscript: (text: string) => void;
+  labels: { start: string; listening: string; unsupported: string };
 }
 
-export function VoiceInput({ langCode, onTranscript }: VoiceInputProps) {
+export function VoiceInput({ langCode, onTranscript, labels }: VoiceInputProps) {
   const { isSupported, isListening, transcript, error, start, stop } =
     useSpeechRecognition(langCode);
 
@@ -19,11 +20,7 @@ export function VoiceInput({ langCode, onTranscript }: VoiceInputProps) {
   }, [transcript]);
 
   if (!isSupported) {
-    return (
-      <p className="text-xs text-ink-soft">
-        Voice input isn't supported in this browser. You can type your question instead.
-      </p>
-    );
+    return <p className="text-xs text-ink-soft">{labels.unsupported}</p>;
   }
 
   return (
@@ -32,7 +29,7 @@ export function VoiceInput({ langCode, onTranscript }: VoiceInputProps) {
         type="button"
         onClick={isListening ? stop : start}
         aria-pressed={isListening}
-        aria-label={isListening ? "Stop recording" : "Start voice input"}
+        aria-label={isListening ? labels.listening : labels.start}
         className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors border ${
           isListening
             ? "bg-alert-light text-alert border-alert/30"
@@ -40,7 +37,7 @@ export function VoiceInput({ langCode, onTranscript }: VoiceInputProps) {
         }`}
       >
         {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-        {isListening ? "Listening… Stop Recording" : "Voice Input"}
+        {isListening ? labels.listening : labels.start}
       </button>
       {error && <span className="text-xs text-alert">{error}</span>}
     </div>

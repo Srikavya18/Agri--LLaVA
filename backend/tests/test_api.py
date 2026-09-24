@@ -58,7 +58,25 @@ def test_analyze_valid_image_hindi():
         data={"language": "hi"},
     )
     assert resp.status_code == 200
-    assert resp.json()["language"] == "hi"
+    body = resp.json()
+    assert body["language"] == "hi"
+    # Content should actually be localized, not just the language field —
+    # Devanagari script should appear in the crop/disease name.
+    assert any("\u0900" <= ch <= "\u097F" for ch in body["crop"] + body["disease"])
+
+
+def test_analyze_valid_image_telugu():
+    img_bytes = _make_image_bytes(color=(20, 90, 20))
+    resp = client.post(
+        "/api/v1/analyze",
+        files={"image": ("leaf.jpg", img_bytes, "image/jpeg")},
+        data={"language": "te"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["language"] == "te"
+    # Telugu script should appear in the crop/disease name, not just the recommendation.
+    assert any("\u0C00" <= ch <= "\u0C7F" for ch in body["crop"] + body["disease"])
 
 
 def test_analyze_missing_image_returns_400_family_error():

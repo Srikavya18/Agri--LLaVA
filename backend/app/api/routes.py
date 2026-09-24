@@ -86,7 +86,7 @@ async def _run_analysis(
     try:
         kb = load_knowledge_base(settings.knowledge_base_path)
         knowledge_entry = retrieve(
-            kb, prediction.get("crop", ""), prediction.get("disease", "")
+            kb, prediction.get("crop", ""), prediction.get("disease", ""), language
         )
     except KnowledgeBaseError as e:
         logger.error("Knowledge base failed to load: %s", e)

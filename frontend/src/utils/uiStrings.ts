@@ -1,0 +1,146 @@
+import type { Language } from "../types/analysis";
+
+/**
+ * Static interface text in all three supported languages. This covers UI
+ * chrome only (buttons, section headers, labels) — NOT agricultural content,
+ * which lives in knowledge/crop_diseases.json and is a separate translation
+ * concern (see that file's "translations" field per entry).
+ */
+export const UI_STRINGS = {
+  en: {
+    heroTitle: "Know what's wrong with your crop, today",
+    heroSubtitle:
+      "Upload a crop leaf image and get an AI-powered explanation of possible diseases, causes, prevention, and treatment.",
+    questionLabel: "Ask a question (optional)",
+    questionPlaceholder: "Describe what you observe on the plant or ask a question...",
+    voiceInput: "Voice Input",
+    voiceListening: "Listening… Stop Recording",
+    voiceUnsupported: "Voice input isn't supported in this browser. You can type your question instead.",
+    languageLabel: "Language",
+    analyzeButton: "Analyze Crop",
+    analyzing: "Analyzing…",
+    loadingMessages: [
+      "Checking the leaf image…",
+      "Analyzing your crop…",
+      "Generating disease explanation…",
+    ],
+    symptoms: "Symptoms",
+    causes: "Causes",
+    prevention: "Prevention",
+    organicTreatment: "Organic Treatment",
+    chemicalTreatment: "Chemical Treatment",
+    confidenceSuffix: "confidence",
+    speakResponse: "Speak Response",
+    stopSpeaking: "Stop",
+    ttsUnsupported: "Text-to-speech is not supported in this browser.",
+    copy: "Copy",
+    copied: "Copied",
+    newAnalysis: "Analyze Another Image",
+    mockBanner: "Development preview — this result comes from the mock inference service, not the trained model.",
+    fallbackBanner: "We couldn't generate a confident result for this image. Try a clearer photo of the affected leaf.",
+    howItWorksTitle: "How it works",
+    step1Title: "1. Upload",
+    step1Body: "Take or choose a clear photo of the affected leaf.",
+    step2Title: "2. Analyze",
+    step2Body: "The system checks the image against known crop diseases.",
+    step3Title: "3. Get guidance",
+    step3Body: "Read or listen to symptoms, causes, and treatment steps.",
+    aboutTitle: "About",
+    aboutBody:
+      "Agri-LLaVA combines computer vision and a vision-language model with a grounded agricultural knowledge base, so explanations stay tied to real, documented disease information rather than invented facts.",
+    footerDisclaimer:
+      "Agri-LLaVA gives informational guidance only. For significant crop damage, consult your local agricultural extension office or a qualified expert before applying any treatment.",
+  },
+  hi: {
+    heroTitle: "आज ही जानें अपनी फसल की समस्या",
+    heroSubtitle:
+      "फसल की पत्ती की तस्वीर अपलोड करें और संभावित रोगों, कारणों, रोकथाम और उपचार की एआई-आधारित जानकारी पाएं।",
+    questionLabel: "प्रश्न पूछें (वैकल्पिक)",
+    questionPlaceholder: "पौधे पर जो देख रहे हैं उसका वर्णन करें या कोई प्रश्न पूछें...",
+    voiceInput: "आवाज़ से इनपुट",
+    voiceListening: "सुन रहा है… रिकॉर्डिंग रोकें",
+    voiceUnsupported: "इस ब्राउज़र में आवाज़ इनपुट समर्थित नहीं है। कृपया अपना प्रश्न टाइप करें।",
+    languageLabel: "भाषा",
+    analyzeButton: "फसल का विश्लेषण करें",
+    analyzing: "विश्लेषण हो रहा है…",
+    loadingMessages: [
+      "पत्ती की छवि जाँची जा रही है…",
+      "आपकी फसल का विश्लेषण हो रहा है…",
+      "रोग की व्याख्या तैयार की जा रही है…",
+    ],
+    symptoms: "लक्षण",
+    causes: "कारण",
+    prevention: "रोकथाम",
+    organicTreatment: "जैविक उपचार",
+    chemicalTreatment: "रासायनिक उपचार",
+    confidenceSuffix: "विश्वास स्तर",
+    speakResponse: "उत्तर सुनें",
+    stopSpeaking: "रोकें",
+    ttsUnsupported: "इस ब्राउज़र में टेक्स्ट-टू-स्पीच समर्थित नहीं है।",
+    copy: "कॉपी करें",
+    copied: "कॉपी हो गया",
+    newAnalysis: "एक और छवि जाँचें",
+    mockBanner: "डेवलपमेंट पूर्वावलोकन — यह परिणाम मॉक सेवा से है, प्रशिक्षित मॉडल से नहीं।",
+    fallbackBanner: "हम इस छवि के लिए विश्वसनीय परिणाम नहीं दे सके। कृपया स्पष्ट तस्वीर के साथ पुनः प्रयास करें।",
+    howItWorksTitle: "यह कैसे काम करता है",
+    step1Title: "1. अपलोड करें",
+    step1Body: "प्रभावित पत्ती की स्पष्ट तस्वीर लें या चुनें।",
+    step2Title: "2. विश्लेषण",
+    step2Body: "सिस्टम छवि की तुलना ज्ञात फसल रोगों से करता है।",
+    step3Title: "3. मार्गदर्शन पाएं",
+    step3Body: "लक्षण, कारण और उपचार के चरण पढ़ें या सुनें।",
+    aboutTitle: "परिचय",
+    aboutBody:
+      "Agri-LLaVA कंप्यूटर विज़न और एक विज़न-लैंग्वेज मॉडल को एक सत्यापित कृषि ज्ञान आधार के साथ जोड़ता है, ताकि व्याख्याएं वास्तविक, प्रलेखित रोग जानकारी पर आधारित रहें, न कि काल्पनिक तथ्यों पर।",
+    footerDisclaimer:
+      "Agri-LLaVA केवल जानकारी के लिए मार्गदर्शन देता है। गंभीर फसल क्षति के लिए, कोई भी उपचार लागू करने से पहले अपने स्थानीय कृषि विस्तार कार्यालय या किसी योग्य विशेषज्ञ से सलाह लें।",
+  },
+  te: {
+    heroTitle: "మీ పంట సమస్యను ఈ రోజే తెలుసుకోండి",
+    heroSubtitle:
+      "పంట ఆకు ఫోటోను అప్‌లోడ్ చేసి, సాధ్యమైన వ్యాధులు, కారణాలు, నివారణ మరియు చికిత్స గురించి AI ఆధారిత వివరణ పొందండి.",
+    questionLabel: "ప్రశ్న అడగండి (ఐచ్ఛికం)",
+    questionPlaceholder: "మొక్కపై మీరు గమనించినది వివరించండి లేదా ప్రశ్న అడగండి...",
+    voiceInput: "వాయిస్ ఇన్‌పుట్",
+    voiceListening: "వింటోంది… రికార్డింగ్ ఆపండి",
+    voiceUnsupported: "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ మద్దతు లేదు. దయచేసి మీ ప్రశ్నను టైప్ చేయండి.",
+    languageLabel: "భాష",
+    analyzeButton: "పంటను విశ్లేషించండి",
+    analyzing: "విశ్లేషిస్తోంది…",
+    loadingMessages: [
+      "ఆకు చిత్రాన్ని పరిశీలిస్తోంది…",
+      "మీ పంటను విశ్లేషిస్తోంది…",
+      "వ్యాధి వివరణను రూపొందిస్తోంది…",
+    ],
+    symptoms: "లక్షణాలు",
+    causes: "కారణాలు",
+    prevention: "నివారణ",
+    organicTreatment: "సేంద్రియ చికిత్స",
+    chemicalTreatment: "రసాయన చికిత్స",
+    confidenceSuffix: "విశ్వాస స్థాయి",
+    speakResponse: "సమాధానం వినండి",
+    stopSpeaking: "ఆపు",
+    ttsUnsupported: "ఈ బ్రౌజర్‌లో టెక్స్ట్-టు-స్పీచ్ మద్దతు లేదు.",
+    copy: "కాపీ చేయండి",
+    copied: "కాపీ అయింది",
+    newAnalysis: "మరో చిత్రాన్ని పరిశీలించండి",
+    mockBanner: "డెవలప్‌మెంట్ ప్రివ్యూ — ఈ ఫలితం మాక్ సేవ నుండి వచ్చింది, శిక్షణ పొందిన మోడల్ నుండి కాదు.",
+    fallbackBanner: "ఈ చిత్రానికి నమ్మదగిన ఫలితాన్ని రూపొందించలేకపోయాము. దయచేసి స్పష్టమైన ఫోటోతో మళ్ళీ ప్రయత్నించండి.",
+    howItWorksTitle: "ఇది ఎలా పనిచేస్తుంది",
+    step1Title: "1. అప్‌లోడ్ చేయండి",
+    step1Body: "ప్రభావిత ఆకు యొక్క స్పష్టమైన ఫోటో తీయండి లేదా ఎంచుకోండి.",
+    step2Title: "2. విశ్లేషణ",
+    step2Body: "వ్యవస్థ చిత్రాన్ని తెలిసిన పంట వ్యాధులతో పోలుస్తుంది.",
+    step3Title: "3. మార్గదర్శకత్వం పొందండి",
+    step3Body: "లక్షణాలు, కారణాలు మరియు చికిత్స దశలను చదవండి లేదా వినండి.",
+    aboutTitle: "గురించి",
+    aboutBody:
+      "Agri-LLaVA కంప్యూటర్ విజన్‌ను మరియు విజన్-లాంగ్వేజ్ మోడల్‌ను ఆధారిత వ్యవసాయ నాలెడ్జ్ బేస్‌తో కలుపుతుంది, తద్వారా వివరణలు కల్పిత విషయాలకు బదులుగా నిజమైన, నమోదు చేయబడిన వ్యాధి సమాచారానికి కట్టుబడి ఉంటాయి.",
+    footerDisclaimer:
+      "Agri-LLaVA కేవలం సమాచార మార్గదర్శకత్వాన్ని మాత్రమే అందిస్తుంది. తీవ్రమైన పంట నష్టం జరిగితే, ఏదైనా చికిత్స వర్తింపజేయడానికి ముందు దయచేసి మీ స్థానిక వ్యవసాయ విస్తరణ కార్యాలయం లేదా అర్హత కలిగిన నిపుణుడిని సంప్రదించండి.",
+  },
+} as const satisfies Record<Language, Record<string, string | string[]>>;
+
+export function useUIStrings(language: Language) {
+  return UI_STRINGS[language];
+}

@@ -111,15 +111,53 @@ pytest -v
 
 ## Deployment
 
-- **Frontend → Vercel**: set the build command to `npm run build`, output directory
-  `dist`, and set `VITE_API_URL` in Vercel's environment variables to your deployed
-  backend URL. Never hard-code it.
-- **Backend → a separate host**: the FastAPI service is CPU-only and lightweight by
-  design — it does not run the model itself in `remote` mode, it forwards requests to
-  a GPU-hosted inference service. See `backend/Dockerfile` (build from the repo root:
-  `docker build -f backend/Dockerfile -t agri-llava-backend .`).
-- **Model inference (GPU)**: not yet built. This is the next major piece — see
-  "Current Status" above.
+### Frontend → Vercel
+
+Create a Vercel project with **Root Directory = `frontend`**. Build command
+`npm run build` and output directory `dist` are auto-detected from
+`package.json`/Vite — no `vercel.json` needed. Set `VITE_API_URL` in the
+project's Environment Variables to your deployed backend URL. Never hard-code it.
+
+### Backend → Vercel (or any host that runs a standard ASGI app)
+
+The backend is CPU-only and lightweight by design — in `INFERENCE_MODE=remote`
+it doesn't run the model itself, it forwards requests to a separately-deployed
+GPU inference service. This makes it deployable on Vercel as its own project:
+
+1. Create a **second, separate** Vercel project from the same repo, with
+   **Root Directory = `backend`**.
+2. Vercel auto-detects the FastAPI app at `app/main.py` (zero-config — no
+   `vercel.json` required for a basic deploy).
+3. Set environment variables in that project's dashboard:
+   - `INFERENCE_MODE=mock` for now (until a real GPU inference service exists).
+   - **Do not set `ENVIRONMENT=production` until `INFERENCE_MODE` is `remote`**
+     — the app deliberately refuses to start with `ENVIRONMENT=production` +
+     `INFERENCE_MODE=mock`, to stop fake predictions from accidentally
+     shipping. Leave `ENVIRONMENT` unset (defaults to `development`) while
+     using mock mode.
+   - `ALLOWED_ORIGINS` = your frontend's Vercel URL.
+4. Redeploy, then point the frontend project's `VITE_API_URL` at this
+   backend's URL (e.g. `https://your-backend.vercel.app`).
+
+**Important — a real cause of "Application startup failed" on Vercel:** the
+backend loads `knowledge/crop_diseases.json` during startup and deliberately
+crashes if that file is missing, rather than silently returning ungrounded
+answers. Vercel only bundles files inside the project's Root Directory, so a
+copy of the knowledge base is kept at `backend/knowledge/crop_diseases.json`
+(self-contained within the backend project) — the top-level `/knowledge/`
+copy is for documentation and future dataset tooling only. If you ever add
+new entries, update both copies, or wire up a small sync check.
+
+### Alternative: Docker, or any non-Vercel host
+
+`backend/Dockerfile` builds a self-contained image (build from the repo root:
+`docker build -f backend/Dockerfile -t agri-llava-backend .`). Use this for
+Render, Railway, Fly.io, or any other host if you'd rather not use Vercel for
+the backend.
+
+### Model inference (GPU)
+
+Not yet built. This is the next major piece — see "Current Status" above.
 
 ## Known Limitations
 
@@ -127,7 +165,14 @@ pytest -v
   Qwen2.5-VL + LoRA adapter is deployed and `INFERENCE_MODE=remote` is configured.
 - No CV baseline (EfficientNet/ResNet) model yet — scaffolded in `ml/` but not built.
 - Knowledge base currently covers 10 crop/disease combinations; expand
-  `knowledge/crop_diseases.json` for broader coverage.
+  `knowledge/crop_diseases.json` (and re-run `scripts/add_translations.py`'s
+  data) for broader coverage.
+- **Hindi/Telugu translations of agricultural content need expert review.**
+  Crop names, symptoms, causes, and prevention were translated using standard
+  agricultural vocabulary, but **treatment instructions are safety-relevant**
+  and should be reviewed by a native speaker with agricultural expertise
+  before this app is used by real farmers making real treatment decisions.
+  See `scripts/add_translations.py` for the full translated content.
 - No performance metrics are reported anywhere in this repo, because none have been
   measured yet — once the CV baseline or LoRA model is trained and evaluated, real
   accuracy/F1/confusion-matrix numbers belong here, not fabricated ones.

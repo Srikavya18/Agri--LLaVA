@@ -4,15 +4,16 @@ import { LANGUAGE_LABELS } from "../types/analysis";
 interface LanguageSelectorProps {
   value: Language;
   onChange: (language: Language) => void;
+  label: string;
 }
 
 const LANGUAGES: Language[] = ["en", "hi", "te"];
 
-export function LanguageSelector({ value, onChange }: LanguageSelectorProps) {
+export function LanguageSelector({ value, onChange, label }: LanguageSelectorProps) {
   return (
     <div>
       <label htmlFor="language" className="block text-sm font-medium text-ink mb-2">
-        Language
+        {label}
       </label>
       <select
         id="language"

@@ -3,6 +3,7 @@ import { Volume2, VolumeX, Copy, Check, RotateCcw } from "lucide-react";
 import type { AnalysisResponse } from "../types/analysis";
 import { SPEECH_LANG_CODES } from "../utils/languageCodes";
 import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
+import { useUIStrings } from "../utils/uiStrings";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 import { DiseaseInformation } from "./DiseaseInformation";
 import { TreatmentSection } from "./TreatmentSection";
@@ -15,14 +16,15 @@ interface AnalysisResultProps {
 function buildSpokenSummary(result: AnalysisResponse): string {
   const parts = [
     `${result.crop}. ${result.disease}.`,
-    result.symptoms.length ? `Symptoms: ${result.symptoms.join(". ")}.` : "",
-    result.prevention.length ? `Prevention: ${result.prevention.join(". ")}.` : "",
+    result.symptoms.length ? `${result.symptoms.join(". ")}.` : "",
+    result.prevention.length ? `${result.prevention.join(". ")}.` : "",
     result.recommendation,
   ];
   return parts.filter(Boolean).join(" ");
 }
 
 export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
+  const strings = useUIStrings(result.language);
   const { isSupported: ttsSupported, isSpeaking, speak, stop } = useSpeechSynthesis();
   const [copied, setCopied] = useState(false);
 
@@ -36,15 +38,19 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
 
   const handleCopy = async () => {
     const text = [
-      `Crop: ${result.crop}`,
-      `Disease: ${result.disease}`,
-      `Confidence: ${Math.round(result.confidence * 100)}%`,
-      result.symptoms.length ? `Symptoms: ${result.symptoms.join(", ")}` : "",
-      result.causes.length ? `Causes: ${result.causes.join(", ")}` : "",
-      result.prevention.length ? `Prevention: ${result.prevention.join(", ")}` : "",
-      result.organic_treatment.length ? `Organic treatment: ${result.organic_treatment.join(", ")}` : "",
-      result.chemical_treatment.length ? `Chemical treatment: ${result.chemical_treatment.join(", ")}` : "",
-      `Recommendation: ${result.recommendation}`,
+      `${strings.symptoms === "Symptoms" ? "Crop" : strings.symptoms}: ${result.crop}`,
+      `${result.disease}`,
+      `${Math.round(result.confidence * 100)}% ${strings.confidenceSuffix}`,
+      result.symptoms.length ? `${strings.symptoms}: ${result.symptoms.join(", ")}` : "",
+      result.causes.length ? `${strings.causes}: ${result.causes.join(", ")}` : "",
+      result.prevention.length ? `${strings.prevention}: ${result.prevention.join(", ")}` : "",
+      result.organic_treatment.length
+        ? `${strings.organicTreatment}: ${result.organic_treatment.join(", ")}`
+        : "",
+      result.chemical_treatment.length
+        ? `${strings.chemicalTreatment}: ${result.chemical_treatment.join(", ")}`
+        : "",
+      result.recommendation,
     ]
       .filter(Boolean)
       .join("\n");
@@ -62,15 +68,13 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
     <section className="rounded-card border border-leaf-light bg-white p-6 space-y-6">
       {result.is_mock && (
         <div className="rounded-card bg-amber-light border border-amber/30 px-4 py-2 text-xs text-amber">
-          Development preview — this result comes from the mock inference service, not the
-          trained model.
+          {strings.mockBanner}
         </div>
       )}
 
       {result.is_fallback && (
         <div className="rounded-card bg-alert-light border border-alert/30 px-4 py-2 text-xs text-alert">
-          We couldn't generate a confident result for this image. Try a clearer photo of the
-          affected leaf.
+          {strings.fallbackBanner}
         </div>
       )}
 
@@ -79,19 +83,27 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
           <p className="text-sm text-ink-soft">{result.crop}</p>
           <h2 className="text-2xl font-display font-semibold text-forest">{result.disease}</h2>
         </div>
-        <ConfidenceBadge confidence={result.confidence} />
+        <ConfidenceBadge confidence={result.confidence} suffix={strings.confidenceSuffix} />
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <DiseaseInformation title="Symptoms" items={result.symptoms} />
-        <DiseaseInformation title="Causes" items={result.causes} />
+        <DiseaseInformation title={strings.symptoms} items={result.symptoms} />
+        <DiseaseInformation title={strings.causes} items={result.causes} />
       </div>
 
-      <DiseaseInformation title="Prevention" items={result.prevention} />
+      <DiseaseInformation title={strings.prevention} items={result.prevention} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <TreatmentSection title="Organic Treatment" items={result.organic_treatment} variant="organic" />
-        <TreatmentSection title="Chemical Treatment" items={result.chemical_treatment} variant="chemical" />
+        <TreatmentSection
+          title={strings.organicTreatment}
+          items={result.organic_treatment}
+          variant="organic"
+        />
+        <TreatmentSection
+          title={strings.chemicalTreatment}
+          items={result.chemical_treatment}
+          variant="chemical"
+        />
       </div>
 
       <div className="rounded-card bg-leaf-light px-4 py-3 text-sm text-forest">
@@ -106,12 +118,10 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
             className="flex items-center gap-2 rounded-full border border-leaf-light px-4 py-2 text-sm text-forest hover:bg-leaf-light transition-colors"
           >
             {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            {isSpeaking ? "Stop" : "Speak Response"}
+            {isSpeaking ? strings.stopSpeaking : strings.speakResponse}
           </button>
         ) : (
-          <span className="text-xs text-ink-soft self-center">
-            Text-to-speech is not supported in this browser.
-          </span>
+          <span className="text-xs text-ink-soft self-center">{strings.ttsUnsupported}</span>
         )}
 
         <button
@@ -120,7 +130,7 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
           className="flex items-center gap-2 rounded-full border border-leaf-light px-4 py-2 text-sm text-forest hover:bg-leaf-light transition-colors"
         >
           {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? strings.copied : strings.copy}
         </button>
 
         <button
@@ -129,7 +139,7 @@ export function AnalysisResult({ result, onNewAnalysis }: AnalysisResultProps) {
           className="flex items-center gap-2 rounded-full bg-forest text-paper px-4 py-2 text-sm hover:bg-leaf-dark transition-colors ml-auto"
         >
           <RotateCcw size={16} />
-          Analyze Another Image
+          {strings.newAnalysis}
         </button>
       </div>
     </section>

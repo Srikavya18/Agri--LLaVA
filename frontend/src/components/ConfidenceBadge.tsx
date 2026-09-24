@@ -1,8 +1,9 @@
 interface ConfidenceBadgeProps {
   confidence: number;
+  suffix: string;
 }
 
-export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
+export function ConfidenceBadge({ confidence, suffix }: ConfidenceBadgeProps) {
   const pct = Math.round(confidence * 100);
 
   let classes = "bg-leaf-light text-leaf-dark border-leaf/30";
@@ -14,7 +15,7 @@ export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
 
   return (
     <span className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium ${classes}`}>
-      {pct}% confidence
+      {pct}% {suffix}
     </span>
   );
 }
